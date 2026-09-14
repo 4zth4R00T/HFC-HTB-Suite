@@ -1,0 +1,44 @@
+[package]
+name = "htb-cli"
+version = "1.0.0"
+edition = "2021"
+description = "Cliente de terminal para Hack The Box Labs: maquinas, retos, fortress, sherlocks, prolabs, VPN y perfil"
+authors = ["Aztharot — Leonardo Ernesto Correa Hernandez <https://github.com/Aztharot-RO0t3t>"]
+homepage = "https://blog.hackersfight.club"
+readme = "../../README.md"
+
+[[bin]]
+name = "htb"
+path = "src/main.rs"
+
+[dependencies]
+reqwest = { version = "0.12", features = ["blocking", "json"] }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+clap = { version = "4", features = ["derive"] }
+colored = "2"
+ratatui = "0.29"
+crossterm = { version = "0.28", features = ["bracketed-paste"] }
+argon2 = "0.5"
+pbkdf2 = "0.12"
+aes = "0.8"
+cbc = "0.1"
+hmac = "0.12"
+sha2 = "0.10"
+zeroize = "1"
+subtle = "2"
+getrandom = "0.2"
+libc = "0.2.189"
+
+[profile.release]
+opt-level = 2
+# Sin simbolos, sin informacion de depuracion y sin desenrollado de pila: un
+# fallo aborta en seco en vez de ir imprimiendo por donde pasaba.
+strip = "symbols"
+debug = false
+debug-assertions = false
+panic = "abort"
+overflow-checks = true
+lto = true
+codegen-units = 1
+incremental = false
