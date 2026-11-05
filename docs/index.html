@@ -1,0 +1,267 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>HTB Suite</title>
+<meta name="description" content="Cliente de terminal para Hack The Box Labs: máquinas, retos, sherlocks, VPN y perfil sin abrir el navegador. Rust, Bash y PowerShell.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Share+Tech+Mono&family=VT323&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#050307;--panel:#0b0712;--ink:#d9f7e6;--dim:#7a8f84;
+  --neon:#39ff88;--cyan:#22e3ff;--magenta:#ff2bd6;--amber:#ffb31a;--red:#ff3b5c;
+  --line:#1f3a2a;--glow:0 0 8px rgba(57,255,136,.55),0 0 24px rgba(57,255,136,.25);
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0;background:var(--bg);color:var(--ink);font-family:"Share Tech Mono",monospace;font-size:17px;line-height:1.55}
+body::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:9;
+  background:repeating-linear-gradient(0deg,rgba(0,0,0,.18) 0 2px,transparent 2px 4px);mix-blend-mode:multiply}
+body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:8;
+  background:radial-gradient(ellipse at center,transparent 55%,rgba(0,0,0,.65) 100%)}
+a{color:var(--cyan);text-decoration:none}
+a:hover{color:var(--magenta);text-shadow:0 0 10px rgba(255,43,214,.6)}
+.wrap{max-width:1080px;margin:0 auto;padding:0 16px}
+canvas#rain{position:fixed;inset:0;z-index:0;opacity:.22}
+main{position:relative;z-index:2}
+
+header.hero{padding:56px 0 32px;border-bottom:1px solid var(--line);position:relative;overflow:hidden}
+.hero .tag{font-family:"Press Start 2P",monospace;font-size:11px;color:var(--magenta);letter-spacing:.12em;text-shadow:0 0 10px rgba(255,43,214,.7)}
+.hero pre.mark{font-size:13px;line-height:1.1;color:var(--neon);text-shadow:var(--glow);margin:18px 0 10px;overflow:auto;white-space:pre}
+@media (max-width:700px){.hero pre.mark{font-size:8px}}
+.hero h1{font-family:"VT323",monospace;font-size:64px;line-height:1;margin:6px 0 10px;color:#fff;letter-spacing:.02em;position:relative}
+.hero h1 .g{position:relative;display:inline-block}
+.hero h1 .g::before,.hero h1 .g::after{content:attr(data-t);position:absolute;left:0;top:0;width:100%;overflow:hidden;clip-path:inset(0 0 0 0)}
+.hero h1 .g::before{color:var(--cyan);transform:translate(-2px,-1px);animation:gl1 3.1s infinite linear alternate-reverse;mix-blend-mode:screen}
+.hero h1 .g::after{color:var(--magenta);transform:translate(2px,1px);animation:gl2 2.7s infinite linear alternate-reverse;mix-blend-mode:screen}
+@keyframes gl1{0%{clip-path:inset(10% 0 80% 0)}20%{clip-path:inset(60% 0 10% 0)}40%{clip-path:inset(30% 0 50% 0)}60%{clip-path:inset(80% 0 5% 0)}80%{clip-path:inset(5% 0 85% 0)}100%{clip-path:inset(45% 0 40% 0)}}
+@keyframes gl2{0%{clip-path:inset(70% 0 10% 0)}25%{clip-path:inset(15% 0 70% 0)}50%{clip-path:inset(50% 0 30% 0)}75%{clip-path:inset(0 0 90% 0)}100%{clip-path:inset(35% 0 45% 0)}}
+.hero p.lead{font-size:20px;max-width:760px;color:var(--ink);margin:0 0 22px}
+.hero p.lead b{color:var(--neon)}
+.cta{display:flex;gap:12px;flex-wrap:wrap;margin:10px 0 0}
+.btn{display:inline-block;padding:12px 18px;border:1px solid var(--neon);color:var(--neon);font-family:"Press Start 2P",monospace;font-size:10px;letter-spacing:.08em;box-shadow:inset 0 0 0 1px rgba(57,255,136,.15),var(--glow);background:rgba(57,255,136,.04)}
+.btn:hover{background:var(--neon);color:#031;text-shadow:none}
+.btn.alt{border-color:var(--magenta);color:var(--magenta);box-shadow:0 0 12px rgba(255,43,214,.35)}
+.btn.alt:hover{background:var(--magenta);color:#200}
+.stamp{position:absolute;right:0;top:40px;font-family:"Press Start 2P",monospace;font-size:9px;color:var(--amber);border:2px solid var(--amber);padding:8px 10px;transform:rotate(8deg);opacity:.9;text-shadow:0 0 8px rgba(255,179,26,.6)}
+@media (max-width:700px){.stamp{display:none}}
+
+section{padding:40px 0;border-bottom:1px solid var(--line)}
+.hd{font-family:"VT323",monospace;font-size:30px;color:var(--neon);text-shadow:var(--glow);margin:0 0 18px}
+.hd span{color:var(--dim);font-size:22px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px}
+.card{background:var(--panel);border:1px solid var(--line);padding:16px;position:relative}
+.card::before{content:"";position:absolute;left:0;top:0;width:3px;height:100%;background:linear-gradient(var(--neon),var(--cyan),var(--magenta))}
+.card h3{margin:0 0 8px;font-family:"Press Start 2P",monospace;font-size:10px;color:var(--cyan);letter-spacing:.06em}
+.card p{margin:0;color:var(--ink);font-size:16px}
+.card .k{color:var(--amber)}
+
+.term{background:#02050a;border:1px solid #163; box-shadow:0 0 0 1px #052 inset,0 0 30px rgba(34,227,255,.08);padding:14px 16px;overflow:auto;font-size:15px;line-height:1.45;white-space:pre;color:#bfe}
+.term .p{color:var(--magenta)}
+.term .c{color:var(--dim)}
+.term .o{color:#9fd}
+.term .ok{color:var(--neon)}
+.term .ip{color:var(--amber);text-shadow:0 0 8px rgba(255,179,26,.5)}
+.term .cur{animation:blink 1s steps(2) infinite;color:var(--neon)}
+@keyframes blink{to{opacity:0}}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+@media (max-width:820px){.two{grid-template-columns:1fr}}
+
+table{width:100%;border-collapse:collapse;font-size:15px}
+th,td{border:1px solid var(--line);padding:8px 10px;text-align:left;vertical-align:top}
+th{color:var(--neon);background:#07110b;font-weight:normal}
+td code,p code,li code{color:var(--amber);background:#0e0a14;padding:1px 5px;border:1px solid #2a1f36}
+
+.keys{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:8px}
+.key{border:1px solid var(--line);padding:8px 10px;background:var(--panel);font-size:15px}
+.key b{color:var(--magenta);font-family:"Press Start 2P",monospace;font-size:9px;margin-right:8px}
+
+.ticker{overflow:hidden;border-top:1px dashed var(--line);border-bottom:1px dashed var(--line);padding:6px 0;margin:0 0 20px}
+.ticker div{display:inline-block;white-space:nowrap;animation:tick 32s linear infinite;color:var(--dim);font-size:14px}
+.ticker div span{color:var(--neon);margin:0 18px}
+@keyframes tick{from{transform:translateX(100%)}to{transform:translateX(-100%)}}
+
+.nfo{border:1px solid var(--line);background:var(--panel);padding:14px 16px;position:relative}
+.nfo .t{position:absolute;top:-10px;left:12px;background:var(--bg);padding:0 8px;color:var(--cyan);font-size:13px}
+footer{padding:40px 0 60px;color:var(--dim);font-size:14px}
+footer .gz{color:var(--neon);font-family:"VT323",monospace;font-size:22px}
+footer pre{color:var(--dim);font-size:12px;line-height:1.1}
+.warn{border-left:3px solid var(--amber);padding:8px 12px;background:#120e05;color:#f3d9a0;font-size:15px}
+</style>
+</head>
+<body>
+<canvas id="rain" aria-hidden="true"></canvas>
+<main>
+<div class="wrap">
+
+<header class="hero">
+ <div class="stamp">100% TERMINAL<br>0% NAVEGADOR</div>
+ <div class="tag">&gt; HFC &gt; HACKERS FIGHT CLUB &gt; RELEASE 1.1</div>
+<pre class="mark" aria-label="HTB Suite">
+██╗  ██╗████████╗██████╗   ███████╗██╗   ██╗██╗████████╗███████╗
+██║  ██║╚══██╔══╝██╔══██╗  ██╔════╝██║   ██║██║╚══██╔══╝██╔════╝
+███████║   ██║   ██████╔╝  ███████╗██║   ██║██║   ██║   █████╗
+██╔══██║   ██║   ██╔══██╗  ╚════██║██║   ██║██║   ██║   ██╔══╝
+██║  ██║   ██║   ██████╔╝  ███████║╚██████╔╝██║   ██║   ███████╗
+╚═╝  ╚═╝   ╚═╝   ╚═════╝   ╚══════╝ ╚═════╝ ╚═╝   ╚═╝   ╚══════╝</pre>
+ <h1><span class="g" data-t="Hack The Box, sin abrir el navegador.">Hack The Box, sin abrir el navegador.</span></h1>
+ <p class="lead">Máquinas, retos, sherlocks, fortress, Pro Labs, tracks, seasons, rankings, Pwnbox y VPN de <b>Labs</b>, desde la terminal, con la IP en vivo en cuanto HTB la asigna. Escrito tres veces: <b>Rust</b>, <b>Bash</b> y <b>PowerShell</b>, mismas teclas, misma carpeta, mismas funciones.</p>
+ <div class="cta">
+  <a class="btn" href="https://github.com/Aztharot-RO0t3t/htb-suite">&gt; CÓDIGO EN GITHUB</a>
+  <a class="btn alt" href="#instalar">&gt; INSTALAR</a>
+  <a class="btn" href="#teclas">&gt; TECLAS</a>
+ </div>
+</header>
+
+<div class="ticker"><div><span>★</span>token cifrado con Argon2id<span>★</span>IP en vivo sin volver al menú<span>★</span>filtros sin escribir nada<span>★</span>español inglés ruso<span>★</span>skin 0day-notes<span>★</span>ratón y portapapeles<span>★</span>sin sudo, sin root, sin telemetría<span>★</span>Rust, Bash y PowerShell a la par<span>★</span></div></div>
+
+<section id="que">
+ <h2 class="hd">01 <span>// lo que hace</span></h2>
+ <div class="grid">
+  <div class="card"><h3>MÁQUINAS</h3><p>Activas, retiradas y sin publicar. Orden por valoración, fecha, dificultad votada, owns o nombre. Filtros de dificultad, sistema y completadas. Favoritas con una tecla. Lanzar, parar, reiniciar, extender y enviar la flag.</p></div>
+  <div class="card"><h3>IP EN VIVO</h3><p>Lanzas y la ficha se queda mirando: en cuanto HTB asigna la IP aparece ahí mismo, con <span class="k">c</span> para copiarla. Nada de volver al menú a comprobar.</p></div>
+  <div class="card"><h3>COMUNIDAD</h3><p>Opiniones, actividad reciente, registro de cambios, writeup oficial, vídeo y guías de la comunidad. Búsqueda global de máquinas, retos, usuarios y equipos.</p></div>
+  <div class="card"><h3>RETOS Y SHERLOCKS</h3><p>Catálogo entero con categoría, dificultad, estado y orden. Zip, contenedor o los dos. Sherlocks con escenario, tareas una a una, evidencias y VM con credenciales.</p></div>
+  <div class="card"><h3>SEASONS Y RANKINGS</h3><p>Temporada activa con cuenta atrás, tier, leaderboard con tu puesto, recompensas. Hall of Fame de usuarios, equipos, universidades y países.</p></div>
+  <div class="card"><h3>VPN Y PWNBOX</h3><p>Servidores por producto, cambio del asignado, descarga del <code>.ovpn</code> en UDP o TCP. Estado de Pwnbox y minutos usados del plan.</p></div>
+  <div class="card"><h3>FORTRESS, PRO LABS, TRACKS</h3><p>Flags contra IP fija, progreso y puntos de entrada de cada Pro Lab, contenido de cada track.</p></div>
+  <div class="card"><h3>SEGURIDAD</h3><p>Token en un vault AES-256 con Argon2id, nunca en claro ni en <code>argv</code>. Se niega a correr como root. Sin OSC 52, sin instalar nada por su cuenta, sin llamar a nadie que no sea HTB.</p></div>
+ </div>
+</section>
+
+<section id="demo">
+ <h2 class="hd">02 <span>// así se ve</span></h2>
+ <div class="two">
+<div class="term"><span class="p">aztharot@kali:~$</span> htb machines list --sort rating --difficulty easy
+<span class="o">Maquinas (active) · 20 · pagina 1/1</span>
+<span class="c">────────────────────────────────────────────────────</span>
+  <span class="ok">★</span> Cap          Linux    Easy   4.6   id 351
+    Editorial    Linux    Easy   4.5   id 608
+    Sea          Linux    Easy   4.3   id 617
+    Nocturnal    Linux    Easy   4.1   id 653
+
+<span class="p">aztharot@kali:~$</span> htb machines spawn 351
+<span class="o">Cap · arrancando…</span>
+<span class="o">Cap · </span><span class="ip">10.129.17.44</span><span class="o"> · caduca en 23h 59m</span>
+
+<span class="p">aztharot@kali:~$</span> htb machines flag 351 HTB{…} --difficulty 3
+<span class="ok">FLAG ACEPTADA · user own · +3 pts</span><span class="cur">▮</span></div>
+<div class="term"><span class="o">┌─[ MÁQUINAS ]──────────────────────────────────────┐</span>
+<span class="o">│</span> Activas          las que están en línea ahora
+<span class="o">│</span> Retiradas        el archivo completo
+<span class="o">│</span> Favoritas        las que marcaste con ★
+<span class="o">│</span> Sin publicar     lo que viene la semana que viene
+<span class="o">│</span> Búsqueda global  máquinas, retos, usuarios, equipos
+<span class="o">│</span> En progreso      como la portada de la web
+<span class="o">│</span> Mi objetivo      la que tienes corriendo
+<span class="o">│</span> Starting Point   los tres niveles
+<span class="o">└────────────────────────────────────────────────────┘</span>
+<span class="c"> a orden  A invertir  v completadas  d dificultad  o SO</span>
+<span class="c"> m favorito  s lanzar  f flag  /  filtro  ? ayuda</span></div>
+ </div>
+</section>
+
+<section id="instalar">
+ <h2 class="hd">03 <span>// instalar</span></h2>
+ <div class="two">
+  <div>
+   <div class="nfo"><span class="t">rust, la recomendada</span>
+<div class="term"><span class="p">$</span> git clone https://github.com/Aztharot-RO0t3t/htb-suite
+<span class="p">$</span> cd htb-suite/rust/htb-cli
+<span class="p">$</span> cargo build --release
+<span class="p">$</span> install -m 755 target/release/htb ~/.local/bin/htb
+<span class="p">$</span> htb token --set     <span class="c">pega tu App Token, elige passphrase</span>
+<span class="p">$</span> htb                 <span class="c">interfaz completa</span></div>
+   </div>
+  </div>
+  <div>
+   <div class="nfo"><span class="t">bash y powershell</span>
+<div class="term"><span class="p">$</span> bash ./htb.sh
+<span class="c">necesita bash 4, curl, jq, openssl, python3, xxd</span>
+
+<span class="p">PS&gt;</span> pwsh -File ./htb.ps1
+<span class="c">PowerShell 7 en Linux, macOS o Windows</span></div>
+   </div>
+   <p class="warn" style="margin-top:14px">El App Token se crea en la web de HTB, en el perfil, apartado App Tokens. Se guarda cifrado en <code>~/.config/htb-hfc/token.vault</code> y se descifra en memoria con tu passphrase al arrancar.</p>
+  </div>
+ </div>
+</section>
+
+<section id="teclas">
+ <h2 class="hd">04 <span>// teclas, las mismas en las tres</span></h2>
+ <div class="keys">
+  <div class="key"><b>↑↓ jk</b>mover</div>
+  <div class="key"><b>↵ → l</b>abrir</div>
+  <div class="key"><b>← Esc q</b>volver</div>
+  <div class="key"><b>/</b>filtro rápido</div>
+  <div class="key"><b>?</b>ayuda de la pantalla</div>
+  <div class="key"><b>c</b>copiar IP o enlace</div>
+  <div class="key"><b>a A</b>orden y sentido</div>
+  <div class="key"><b>v d o</b>completadas, dificultad, SO</div>
+  <div class="key"><b>m</b>favorito</div>
+  <div class="key"><b>s t r e</b>lanzar, parar, reiniciar, extender</div>
+  <div class="key"><b>f</b>enviar flag</div>
+  <div class="key"><b>i w o a g</b>ficha, guías, opiniones, actividad, cambios</div>
+  <div class="key"><b>F2</b>tema</div>
+  <div class="key"><b>F5</b>refrescar</div>
+  <div class="key"><b>ratón</b>clic, rueda, clic derecho</div>
+  <div class="key"><b>Ctrl+C</b>salir</div>
+ </div>
+</section>
+
+<section id="cli">
+ <h2 class="hd">05 <span>// también sin interfaz</span></h2>
+<div class="term"><span class="p">$</span> htb machines list --state retired --sort release_date --asc --page 3
+<span class="p">$</span> htb machines tags 351          <span class="c">sinopsis, etiquetas, matriz, bloods</span>
+<span class="p">$</span> htb machines walkthroughs 351  <span class="c">writeup oficial, vídeo, guías</span>
+<span class="p">$</span> htb machines search lame       <span class="c">máquinas, retos, usuarios, equipos</span>
+<span class="p">$</span> htb machines dashboard recommended
+<span class="p">$</span> htb challenges list --category web --unsolved --sort rating
+<span class="p">$</span> htb challenges download 106
+<span class="p">$</span> htb sherlocks --search brutus --category dfir
+<span class="p">$</span> htb seasons --leaderboard --page 2
+<span class="p">$</span> htb rankings teams
+<span class="p">$</span> htb vpn download 28 --tcp
+<span class="p">$</span> htb pwnbox</div>
+</section>
+
+<section id="quien">
+ <h2 class="hd">06 <span>// quién</span></h2>
+ <table>
+  <tr><th>programa de</th><td>Aztharot · <a href="https://instagram.com/its_aztharot">instagram.com/its_aztharot</a> · <a href="https://github.com/Aztharot-RO0t3t">github.com/Aztharot-RO0t3t</a></td></tr>
+  <tr><th>pertenece a</th><td>Aztharot y HFC, Hackers Fight Club · <a href="https://instagram.com/hackersfightclub">instagram.com/hackersfightclub</a> · <a href="https://blog.hackersfight.club">blog.hackersfight.club</a></td></tr>
+  <tr><th>gracias a</th><td>Lorne, Ookami y Pablocro, por el apoyo y por la inspiración que llevó a hacer esto</td></tr>
+  <tr><th>licencia</th><td>Úsalo, rómpelo y mejóralo. Solo no le quites la firma.</td></tr>
+ </table>
+</section>
+
+</div>
+<footer>
+ <div class="wrap">
+<pre aria-hidden="true">      _______
+    .'       '.
+   /  _     _  \
+  |  (o)   (o)  |
+  |      ^      |
+   \   \___/   /
+    '.  ___  .'
+      '-----'</pre>
+  <p class="gz">greetz: Lorne · Ookami · Pablocro · toda la gente de HFC</p>
+  <p>Hack The Box y HTB Labs son marcas de Hack The Box Ltd. Cliente no oficial: usa la API con el token de tu propia cuenta y no almacena nada fuera de tu máquina.</p>
+ </div>
+</footer>
+</main>
+<script>
+(function(){
+  var c=document.getElementById('rain'),x=c.getContext('2d'),w,h,cols,drops,chars='01HTB{}#$%&<>/\\|アイウエオカキクケコ';
+  function size(){w=c.width=innerWidth;h=c.height=innerHeight;cols=Math.floor(w/14);drops=[];for(var i=0;i<cols;i++)drops[i]=Math.random()*h/14;}
+  size();addEventListener('resize',size);
+  function draw(){x.fillStyle='rgba(5,3,7,0.12)';x.fillRect(0,0,w,h);x.font='13px "Share Tech Mono",monospace';
+    for(var i=0;i<cols;i++){x.fillStyle=Math.random()<.04?'#ff2bd6':'#39ff88';x.fillText(chars[Math.floor(Math.random()*chars.length)],i*14,drops[i]*14);
+      if(drops[i]*14>h&&Math.random()>.975)drops[i]=0;drops[i]+=.6;}}
+  setInterval(draw,50);
+})();
+</script>
+</body>
+</html>

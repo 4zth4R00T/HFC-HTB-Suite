@@ -1,0 +1,48 @@
+[package]
+name = "htb-cli"
+version = "1.2.0"
+edition = "2021"
+description = "Cliente de terminal para Hack The Box Labs: maquinas, retos, fortress, sherlocks, prolabs, VPN y perfil"
+authors = ["Aztharot <https://github.com/Aztharot-RO0t3t>"]
+homepage = "https://blog.hackersfight.club"
+readme = "../../README.md"
+publish = false
+
+[[bin]]
+name = "htb"
+path = "src/main.rs"
+
+[dependencies]
+unicode-width = "0.2"
+reqwest = { version = "0.13", default-features = false, features = ["blocking", "json", "rustls-no-provider", "gzip"] }
+rustls = { version = "0.23", default-features = false, features = ["ring", "std", "tls12"] }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+clap = { version = "4", features = ["derive"] }
+colored = "3"
+ratatui = "0.30"
+crossterm = { version = "0.29", features = ["bracketed-paste"] }
+argon2 = "0.6"
+pbkdf2 = "0.13"
+aes = "0.9"
+cbc = "0.2"
+hmac = "0.13"
+sha2 = "0.11"
+zeroize = "1"
+subtle = "2"
+getrandom = "0.4"
+libc = "0.2.189"
+
+[target.'cfg(windows)'.dependencies]
+windows-sys = { version = "0.61", features = ["Win32_Foundation", "Win32_UI_Shell", "Win32_UI_WindowsAndMessaging", "Win32_System_LibraryLoader", "Win32_System_Diagnostics_Debug", "Win32_System_Com", "Win32_System_DataExchange", "Win32_System_Memory", "Win32_System_Ole"] }
+
+[profile.release]
+opt-level = 2
+strip = "symbols"
+debug = false
+debug-assertions = false
+panic = "abort"
+overflow-checks = true
+lto = true
+codegen-units = 1
+incremental = false

@@ -1,0 +1,8 @@
+rust/htb-cli/target/
+.hfc/
+*.ovpn
+*.zip
+APIHTB
+token
+token.vault
+release/
